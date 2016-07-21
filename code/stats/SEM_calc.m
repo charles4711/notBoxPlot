@@ -1,7 +1,7 @@
-function sem=SEM_calc(vect, CI)
+function sem=SEM_calc(vect, CI,g)
 % SEM_calc - standard error of the mean, confidence interval
 %
-% function sem=SEM_calc(vect, CI) 
+% function sem=SEM_calc(vect, CI,g) 
 %
 % Purpose
 % Calculate the standard error the mean to a given confidence
@@ -14,10 +14,10 @@ function sem=SEM_calc(vect, CI)
 % - vect: A vector upon which the SEM will be calculated. Note that
 %         if vect is a matrix then we calculate one SEM for each
 %         column. 
-%
+%- g: Weights for Samples in vect
 % - CI [optional]: a p value for a different 2-tailed interval. e.g. 0.01
 %   This is a 2-tailed interval.
-%
+% 
 % Outputs
 % sem - the standard error of the mean. So to plot the interval it's mu-sem
 % to mu+sem. 
@@ -35,7 +35,7 @@ function sem=SEM_calc(vect, CI)
 %
 % Also see - tInterval_Calc, norminv
 
-narginchk(1,2)
+narginchk(1,3)
 if(iscell(vect))
     vect=vect{:};
 end
@@ -44,14 +44,14 @@ if isvector(vect)
 end
 
 
-if nargin==1
+if(isempty(CI))
   stdCI = 1.96 ; 
-elseif nargin==2
+else
   CI = CI/2 ; %Convert to 2-tail
   stdCI = abs(norminv(CI,0,1)) ;
 end
 
-sem = ( (nanstd(vect)) ./ sqrt(sum(~isnan(vect))) ) * stdCI ;    
+sem = ( (nanstd(vect,g)) ./ sqrt(sum(~isnan(vect))) ) * stdCI ;    
 
 
 

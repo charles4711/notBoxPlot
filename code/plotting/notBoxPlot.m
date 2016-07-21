@@ -109,10 +109,17 @@ if nargin==0
     help(mfilename)
     return
 end
-
-
-if isvector(y), y=y(:); end
-
+if iscell(y)
+    a=size(y);
+    if(a(2)>1)
+        g=y(:,2);
+        y=y(:,1);
+    else
+        g= cellfun(@(x) ones(length(x),1),y,'UniformOutput',0);
+    end
+elseif isvector(y)
+    y=y(:);
+end
 if nargin<2 || isempty(x)
     x=1:size(y,2);
 end
@@ -144,7 +151,7 @@ if isvector(y) && isvector(x) && length(x)>1
     u=unique(x);
     for ii=1:length(u)
         f=x==u(ii);
-        h(ii)=notBoxPlot(y(f),u(ii),jitter,style);
+        h(ii)=notBoxPlot({y(f),g(f)},u(ii),jitter,style);
     end
 
 
@@ -185,7 +192,7 @@ hold on
 h=[];
 for ii=1:length(uX)
     f=b==ii;
-    h=[h,myPlotter(x(f),y(:,f))];
+    h=[h,myPlotter(x(f),y(:,f),g)];
 end
 
 hold off
@@ -207,13 +214,19 @@ end
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function h=myPlotter(X,Y)
- if(iscell(Y))
+function h=myPlotter(X,Y,g)
+ while(iscell(Y))
     Y=Y{:};
  end
- SEM=SEM_calc(Y); %Supplied external function
- SD=nanstd(Y);  %Requires the stats toolbox 
- mu=nanmean(Y); %Requires the stats toolbox 
+ while(iscell(g))
+    g=g{:};
+ end
+ if(isempty(g))
+     g=ones(size(Y));
+ end
+ SEM=SEM_calc(Y,[],g); %Supplied external function
+ SD=nanstd(Y,g);  %Requires the stats toolbox 
+ mu=sum(length(Y))*nanmean(Y.*g./sum(g)); %Requires the stats toolbox 
 
  %The plot colors to use for multiple sets of points on the same x
  %location
