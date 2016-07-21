@@ -208,7 +208,9 @@ end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function h=myPlotter(X,Y)
-
+ if(iscell(Y))
+    Y=Y{:};
+ end
  SEM=SEM_calc(Y); %Supplied external function
  SD=nanstd(Y);  %Requires the stats toolbox 
  mu=nanmean(Y); %Requires the stats toolbox 

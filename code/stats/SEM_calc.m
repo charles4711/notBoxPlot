@@ -35,8 +35,10 @@ function sem=SEM_calc(vect, CI)
 %
 % Also see - tInterval_Calc, norminv
 
-error(nargchk(1,2,nargin))
-
+narginchk(1,2)
+if(iscell(vect))
+    vect=vect{:};
+end
 if isvector(vect)
   vect=vect(:);
 end
