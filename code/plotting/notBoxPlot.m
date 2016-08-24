@@ -111,12 +111,15 @@ if nargin==0
 end
 if iscell(y)
     a=size(y);
-    if(a(2)>1)
+    g= cellfun(@(x) ones(length(x),1),y,'UniformOutput',0);
+    r=cell(size(y,1),1);
+    if(a(2)>=2)
         g=y(:,2);
-        y=y(:,1);
-    else
-        g= cellfun(@(x) ones(length(x),1),y,'UniformOutput',0);
     end
+    if(a(2)>=3)
+        r=y(:,3);
+    end
+    y=y(:,1);
 elseif isvector(y)
     y=y(:);
 end
@@ -151,7 +154,7 @@ if isvector(y) && isvector(x) && length(x)>1
     u=unique(x);
     for ii=1:length(u)
         f=x==u(ii);
-        h(ii)=notBoxPlot({y(f),g(f)},u(ii),jitter,style);
+        h(ii)=notBoxPlot({y(f),g(f),r(f)},u(ii),jitter,style);
     end
 
 
@@ -192,7 +195,7 @@ hold on
 h=[];
 for ii=1:length(uX)
     f=b==ii;
-    h=[h,myPlotter(x(f),y(:,f),g)];
+    h=[h,myPlotter(x(f),y(:,f),g,r)];
 end
 
 hold off
@@ -214,15 +217,21 @@ end
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function h=myPlotter(X,Y,g)
+function h=myPlotter(X,Y,g,r)
  while(iscell(Y))
     Y=Y{:};
  end
  while(iscell(g))
     g=g{:};
  end
+ while(iscell(r))
+    r=r{:};
+ end
  if(isempty(g))
      g=ones(size(Y));
+ end
+ if(isempty(r))
+     r=cell(size(Y));
  end
  SEM=SEM_calc(Y,[],g); %Supplied external function
  SD=nanstd(Y,g);  %Requires the stats toolbox 
@@ -253,9 +262,9 @@ function h=myPlotter(X,Y,g)
      C=cols(k,:);
      J=(rand(size(thisX))-0.5)*jitter;
 
-        
      h(k).data=plot(thisX+J, thisY, 'o', 'color', C,...
-                   'markerfacecolor', C+(1-C)*0.65);
+                   'markerfacecolor', C+(1-C)*0.65,...
+                   'UserData',r(:));
  end
 
  if strcmp(style,'line') || strcmp(style,'sdline')
